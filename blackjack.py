@@ -14,6 +14,8 @@ def drawCards(amount):
 
 def randomAI(Game):
 	options = ["hit", "stand"]
+	if Game.player.hand.total in range(9,12) and Game.turn == 0:
+		options.append("double")
 	return random.choice(options)
 
 class Hand:
@@ -66,6 +68,8 @@ class BlackJackGame:
 		self.earnings = 0
 		self.bet = bet
 		self.debug = debug
+		self.double = False
+		self.turn = 0
 
 	def log(self, text):
 		if not self.debug:
@@ -120,6 +124,7 @@ class BlackJackGame:
 			self.earnings += self.bet*3
 
 	def nextRound(self):
+		turn += 1
 		p_act = self.player.play(self)
 		d_act = self.dealer.play(self)
 		if d_act == "hit":
@@ -131,6 +136,10 @@ class BlackJackGame:
 			self.hit()
 		elif p_act == "stand":
 			self.stand()
+		elif p_act == "double":
+			self.bet = self.bet*2
+			self.player.hand.draw(1)
+			self.hit()
 
 		if not self.active:
 			return self.result
