@@ -58,20 +58,28 @@ class Player:
 
 class BlackJackGame:
 	""""A game of blackjack."""
-	def __init__(self, player_AI):
+	def __init__(self, player_AI, bet, debug):
 		self.player = Player(player_AI)
 		self.dealer = Dealer()
 		self.result = "Draw, Player's money was returned."
 		self.active = True
+		self.earnings = 0
+		self.bet = bet
+		self.debug = debug
+
+	def log(self, text):
+		if not self.debug:
+			return
+		print(text)
 
 	def hit(self):
 		self.player.hand.draw(1)
-		print("Player's hand: "+str(self.player.hand.cards))
+		self.log("Player's hand: "+str(self.player.hand.cards))
 		self.player.bust = self.player.hand.total() > 21
 		if self.player.bust:
 			self.endGame()
 		if self.player.hand.total() == 21:
-			print("Player has blackjack.")
+			self.log("Player has blackjack.")
 			self.endGame()
 
 	def stand(self):
@@ -82,28 +90,34 @@ class BlackJackGame:
 		p_sum  = self.player.hand.total()
 		d_sum = self.dealer.hand.total()
 		if self.player.natural and not self.dealer.natural:
-			print("Player has natural blackjack.")
-			self.result = "Player wins."
+			self.log("Player has natural blackjack.")
+			self.result = "Player wins with natural."
 		elif self.dealer.natural and not self.player.natural:
-			print("Dealer has natural blackjack.")
+			self.log("Dealer has natural blackjack.")
 			self.result = "House wins."
 		elif self.dealer.natural and self.player.natural:
-			print("Dealer and Player and natural blackjack.")
+			self.log("Dealer and Player have natural blackjack.")
 		elif self.player.bust:
 			self.result = "House wins."
-			print("Player busts!")
+			self.log("Player busts!")
 		elif self.dealer.bust:
 			self.result = "Player wins."
-			print("Dealer busts!")
+			self.log("Dealer busts!")
 		elif p_sum > d_sum:
 			self.result = "Player wins."
 		elif d_sum > p_sum:
 			self.result = "House wins."
 
-		print("\nPlayer: "+str(p_sum))
-		print(self.player.hand.cards)
-		print("Dealer: "+str(d_sum))
-		print(self.dealer.hand.cards)
+		self.log("\nPlayer: "+str(p_sum))
+		self.log(self.player.hand.cards)
+		self.log("Dealer: "+str(d_sum))
+		self.log(self.dealer.hand.cards)
+		if self.result == "House wins.":
+			self.earnings -= self.bet
+		elif self.result == "Player wins.":
+			self.earnings += self.bet*2
+		elif self.result == "Player wins with natural.":
+			self.earnings += self.bet*3
 
 	def nextRound(self):
 		p_act = self.player.play(self)
@@ -111,7 +125,7 @@ class BlackJackGame:
 		if d_act == "hit":
 			self.dealer.hand.draw(1)
 
-		print("Player chose to "+p_act)
+		self.log("Player chose to "+p_act)
 
 		if p_act == "hit":
 			self.hit()
@@ -119,18 +133,31 @@ class BlackJackGame:
 			self.stand()
 
 		if not self.active:
-			return print(self.result)
+			return self.result
 		self.nextRound()
 
 	def simulate(self):
-		print("Dealer's card: "+str(self.dealer.upcard))
-		print("Player's hand: "+str(self.player.hand.cards))
+		self.log("Dealer's card: "+str(self.dealer.upcard))
+		self.log("Player's hand: "+str(self.player.hand.cards))
 		if self.player.natural or self.dealer.natural:
 			self.endGame()
-			return print(self.result)
+			return self.result
 		return self.nextRound()
 
-game = BlackJackGame(randomAI)
-game.simulate()
+def goBankrupt(money):
+	counter = 0
+	peak = money
+	def newGame():
+		game = BlackJackGame(randomAI, 1, False)
+		game.simulate()
+		return game.earnings
+	while money > 0:
+		money += newGame()
+		if money > peak:
+			peak = money
+		counter += 1
+	print("Player went bankrupt after "+str(counter)+" games. At their peak, they owned "+str(peak)+" chips.")
+
+goBankrupt(1000)
 
 #achieved game functionality in 1hr 40m
