@@ -46,7 +46,7 @@ class Dealer:
 		return "hit"
 
 class Player:
-	"""Player class, responds with hit, stand, double or surrender based on AI/human input"""
+	"""Player class, responds with hit or stand based on AI/human input"""
 	def __init__(self, player_AI):
 		self.hand = Hand()
 		self.bust = False
