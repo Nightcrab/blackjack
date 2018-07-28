@@ -60,7 +60,7 @@ class Player:
 
 class BlackJackGame:
 	""""A game of blackjack."""
-	def __init__(self, player_AI, bet, debug):
+	def __init__(self, player_AI, bet, debug=False):
 		self.player = Player(player_AI)
 		self.dealer = Dealer()
 		self.result = "Draw, Player's money was returned."
@@ -124,7 +124,7 @@ class BlackJackGame:
 			self.earnings += self.bet*3
 
 	def nextRound(self):
-		turn += 1
+		self.turn += 1
 		p_act = self.player.play(self)
 		d_act = self.dealer.play(self)
 		if d_act == "hit":
@@ -157,7 +157,7 @@ def goBankrupt(money):
 	counter = 0
 	peak = money
 	def newGame():
-		game = BlackJackGame(randomAI, 1, False)
+		game = BlackJackGame(randomAI, 1)
 		game.simulate()
 		return game.earnings
 	while money > 0:
@@ -165,7 +165,7 @@ def goBankrupt(money):
 		if money > peak:
 			peak = money
 		counter += 1
-	print("Player went bankrupt after "+str(counter)+" games. At their peak, they owned "+str(peak)+" chips.")
+	print("Murk went bankrupt after "+str(counter)+" games. At their peak, they owned "+str(peak)+" chips.")
 
 goBankrupt(1000)
 
